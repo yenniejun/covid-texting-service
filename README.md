@@ -40,8 +40,10 @@ I am getting my stats for the U.S. States from [Worldometers](https://www.worldo
 
 To set up this service locally, you will need to set up the twilio service and the Flask framework.
 
-## Installation
-1. Clone the repo: `git clone https://github.com/yenniejun/covid-texting-service.git`
+1. Clone the repo: 
+
+```git clone https://github.com/yenniejun/covid-texting-service.git```
+
 2. Install a [Chrome Driver](https://chromedriver.chromium.org/)
 3. Activate virtual environment and install selenium
 ```
@@ -49,22 +51,29 @@ pip install virtualenv
 source venv/bin/activate
 pip install selenium
 ```
-4. Run the Flask application 
-`python3 run.py` 
+4. I would recommend following the set-up steps in the [twilio tutorial](https://www.twilio.com/docs/sms/quickstart/python-msg-svc). This will help you get a phone number, connect the number with the local backend, and to setup ngrok.
 
-
-## Set Up Texting Service
-I would recommend following the set-up steps in the [twilio tutorial](https://www.twilio.com/docs/sms/quickstart/python-msg-svc).
+# Usage
+In Terminal, you should have ngrok open in one tab and the Flask application in another.
 
 To run locally, run ngrok to expose the service to the Internet.
 
 `ngrok http 5000`
 
-For more specific instructions on how to get a phone number, to connect the number with the local backend, and to setup ngrok, I would recommend following the steps in the tutorial. 
+
+Once you have ngrok running, you can run the Flask application.
+
+`
+python3 run.py
+`
 
 
-# Usage
-Text "HELLO" to get started
+ngrok             |  flask
+:-------------------------:|:-------------------------:
+![](/img/ngrok.png)  |  ![](/img/runpy.png)
+
+
+Text "HELLO" from your phone to the phone number to get started. Debug statements will show up on the Terminal window running the application.
 
 
 # Looking Forward
