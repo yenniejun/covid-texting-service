@@ -21,7 +21,7 @@ _             |  _
 The reason I created a texting service is to ensure that even those without Internet can access the latest stats on COVID in their region. There are currently a lot of numbers and resources on many different websites, but they are not accessible to those without Internet access. 
 
 
-According to a 2019 Pew Research survey](https://www.pewresearch.org/fact-tank/2019/04/22/some-americans-dont-use-the-internet-who-are-they/), 10% of Americans (nearly 33 million people) do not use the Internet. In [Louisiana](Broadband Now](https://broadbandnow.com/Louisiana), over 400,000 people without access to a wired connection capable of 25mbps download speeds, and 262,000 people without any wired Internet providers available where they live. 
+According to a [2019 Pew Research survey](https://www.pewresearch.org/fact-tank/2019/04/22/some-americans-dont-use-the-internet-who-are-they/), 10% of Americans (nearly 33 million people) do not use the Internet. In [Louisiana](https://broadbandnow.com/Louisiana), over 400,000 people without access to a wired connection capable of 25mbps download speeds, and 262,000 people without any wired Internet providers available where they live. 
 
 However, most people have texting, and a service like this would make the live numbers more easily accessible. 
 
