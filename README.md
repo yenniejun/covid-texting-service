@@ -58,17 +58,21 @@ I would recommend following the set-up steps in the [twilio tutorial](https://ww
 
 To run locally, run ngrok to expose the service to the Internet.
 
-`ngrok http 5000`. 
+`ngrok http 5000`
 
 For more specific instructions on how to get a phone number, to connect the number with the local backend, and to setup ngrok, I would recommend following the steps in the tutorial. 
 
 
 # Usage
-
+Text "HELLO" to get started
 
 
 # Looking Forward
 * Investigate more accurate source of stats
+* Investigate an efficient way of auto-refresh
+* Investigate a caching system... Currently I am pulling each time ... Since the numbers on the official sites do not update actually real-time, I don't need to use the chrome webdriver with each query... I can simluate real-time by pulling every hour or whatever number makes the most sense. TODO figure this out
+* Support typos or slight mispellings of regions
+* Support state abbreviations (i.e. LA finds Louisiana)
 * I want to create an email service using the same scraping service for Live COVID updates. Users can sign up for how often they want updates (once a day? real-time?) and for the regions that affect them the most (i.e. local, state, country) as well as family or friends that reside in different regions.
 
 
