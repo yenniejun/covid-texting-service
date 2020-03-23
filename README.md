@@ -21,9 +21,9 @@ _             |  _
 The reason I created a texting service is to ensure that even those without Internet can access the latest stats on COVID in their region. There are currently a lot of numbers and resources on many different websites, but they are not accessible to those without Internet access. 
 
 
-According to a [2019 Pew Research survey](https://www.pewresearch.org/fact-tank/2019/04/22/some-americans-dont-use-the-internet-who-are-they/), 10% of Americans (nearly 33 million people) do not use the Internet. In [Louisiana](https://broadbandnow.com/Louisiana), over 400,000 people without access to a wired connection capable of 25mbps download speeds, and 262,000 people without any wired Internet providers available where they live. 
+According to a [2019 Pew Research survey](https://www.pewresearch.org/fact-tank/2019/04/22/some-americans-dont-use-the-internet-who-are-they/), 10% of Americans (nearly 33 million people) do not use the Internet. In [Louisiana](https://broadbandnow.com/Louisiana), over 400,000 people do not have access to a wired connection capable of 25mbps download speeds, and 262,000 people do not have any wired Internet providers available where they live. 
 
-However, most people have texting, and a service like this would make the live numbers more easily accessible. 
+However, most people have texting, and a service like this would make it easier to access the most up-to-date COVID numbers for the areas that you care most about - at the state level as well as at the local (parish) level.
 
 Note: Louisiana currently has a texting service (text LACOVID to 898211), but it focuses more on recent state-wide announcements, and often contains links, which may not be accessible to those without Internet connection. Further, it doesn't tell you the most up-to-date numbers on COVID in your region, which is very pertinent residents as you increasingly self-quarantine.
 
