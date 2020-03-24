@@ -43,18 +43,23 @@ def incoming_sms():
     # Gets the total for each state
     elif stripped_body in us_states:
         state = corona.get_us_state(bot_us, stripped_body, is_total = False)
+        print(state)
+
         state_name = state.State.values[0]
         total_cases = state.TotalCases.values[0]
-        new_cases = state.NewCases.values[0] or 0
-        total_deaths = state.TotalDeaths.values[0]
+        new_cases = state.NewCases.values[0]  or 0
+        case_percent = str("{:.1f}".format(state.CasePercentInc.values[0] * 100)) + "%"
+        total_deaths = state.TotalDeaths.values[0] or 0
         new_deaths = state.NewDeaths.values[0] or 0
+        death_percent = str("{:.1f}".format(state.DeathPercentInc.values[0] * 100)) + "%"
 
-        if new_cases == "" and new_deaths == "":
+        if new_cases == 0 or new_deaths == 0:
            resp.message("{0} has {1} cases and {2} deaths".
                 format(state_name, total_cases, total_deaths))
         else:
-            resp.message("{0} has {1} cases ({2} new) and {3} deaths ({4} new)".
-                format(state_name, total_cases, new_cases, total_deaths, new_deaths))
+            resp.message("{0} has {1} cases ({2} new, {3} inc) and {4} deaths ({5} new, {6} inc)".
+                format(state_name, total_cases, new_cases, case_percent,
+                    total_deaths, new_deaths, death_percent))
 
     # Gets the total for each Louisiana parish
     elif stripped_body in louisiana_parishes:
