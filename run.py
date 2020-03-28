@@ -1,16 +1,33 @@
 from flask import Flask, request, session
 from twilio.twiml.messaging_response import MessagingResponse
-import corona
+import requests
 import string
 import re
-import pandas as pd
+import json
+
+# TODO AUTO REFRESH
 
 # hard coded for now ... ¯\_(ツ)_/¯
-louisiana_parishes = ['orleans', 'jefferson', 'catahoula', 'st.james', 'st.tammany', 'eastbatonrouge', 'ascension', 'caddo', 'st.bernard', 'lafourche', 'terrebonne', 'parishunderinvestigation', 'st.johnthebaptist', 'st.charles', 'lafayette', 'bossier', 'plaquemines', 'calcasieu', 'ouachita', 'rapides', 'st.landry', 'tangipahoa', 'westbatonrouge', 'desoto', 'evangeline', 'iberia', 'iberville', 'livingston', 'washington', 'acadia', 'assumption', 'avoyelles', 'beauregard', 'bienville', 'claiborne', 'st.mary', 'webster', 'allen', 'caldwell', 'cameron', 'concordia', 'eastcarroll', 'eastfeliciana', 'franklin', 'grant', 'jackson', 'jeffersondavis', 'lasalle', 'lincoln', 'madison', 'morehouse', 'natchitoches', 'pointecoupee', 'redriver', 'richland', 'sabine', 'st.helena', 'st.martin', 'tensas', 'union', 'vermilion', 'vernon', 'westcarroll', 'westfeliciana', 'winn']
-us_states = ['newyork', 'washington', 'newjersey', 'california', 'illinois', 'michigan', 'florida', 'louisiana', 'massachusetts', 'georgia', 'texas', 'colorado', 'tennessee', 'pennsylvania', 'wisconsin', 'ohio', 'northcarolina', 'maryland', 'connecticut', 'virginia', 'mississippi', 'indiana', 'southcarolina', 'nevada', 'utah', 'minnesota', 'arkansas', 'oregon', 'alabama', 'arizona', 'kentucky', 'districtofcolumbia', 'missouri', 'iowa', 'maine', 'rhodeisland', 'newhampshire', 'oklahoma', 'newmexico', 'kansas', 'delaware', 'hawaii', 'vermont', 'idaho', 'nebraska', 'montana', 'northdakota', 'wyoming', 'alaska', 'southdakota', 'westvirginia', 'diamondprincesscruise', 'grandprincesscruise']
+louisiana_parishes = ['orleans','jefferson','caddo','eastbatonrouge','sttammany','ascension','lafayette','stjohnthebaptist','stjames','bossier','stbernard','lafourche','rapides','ouachita','terrebonne','stcharles','calcasieu','iberville','plaquemines','desoto','livingston','westbatonrouge','avoyelles','stmartin','stlandry','webster','assumption','acadia','washington','tangipahoa','lincoln','stmary','allen','eastfeliciana','beauregard','evangeline','iberia','union','claiborne','jackson','richland','morehouse','natchitoches','vermilion','vernon','catahoula','bienville','pointecoupee','jeffersondavis','grant','madison','lasalle','winn','westfeliciana']
+us_states = ['newyork','newjersey','california','washington','michigan','massachusetts','florida','illinois','louisiana','pennsylvania','georgia','colorado','texas','connecticut','tennessee','ohio','indiana','wisconsin','maryland','northcarolina','missouri','arizona','virginia','mississippi','alabama','southcarolina','nevada','utah','oregon','minnesota','arkansas','oklahoma','districtofcolumbia','kentucky','iowa','idaho','rhodeisland','kansas','newmexico','newhampshire','vermont','maine','delaware','montana','hawaii','westvirginia','alaska','nebraska','wyoming','northdakota','southdakota']
+countries = ['unitedstates','italy','chinamainland','spain','germany','france','iran','unitedkingdom','switzerland','southkorea','netherlands','austria','belgium','turkey','canada','portugal','norway','australia','brazil','sweden','israel','czechrepublic','denmark','malaysia','ireland','ecuador','chile','luxembourg','poland','japan','pakistan','romania','southafrica','thailand','saudiarabia','indonesia','finland','russia','greece','iceland','india','philippines','panama','singapore','mexico','argentina','peru','slovenia','croatia','dominicanrepublic','estonia','qatar','colombia','egypt','serbia','hongkong','bahrain','iraq','newzealand','algeria','unitedarabemirates','lebanon','morocco','lithuania','armenia','ukraine','hungary','bulgaria','latvia','slovakia','taiwan','andorra','costarica','uruguay','bosniaandherzegovina','tunisia','kuwait','sanmarino','northmacedonia','jordan','moldova','albania','burkinafaso','azerbaijan','vietnam','cyprus','runion','malta','ghana','kazakhstan','oman','senegal','brunei','venezuela','srilanka','cambodia','ctedivoire','honduras','mauritius','belarus','afghanistan','cameroon','palestinianauthority','uzbekistan','georgia','nigeria','cuba','guadeloupe','kosovo','montenegro','trinidadandtobago','martinique','puertorico','bolivia','kyrgyzstan','liechtenstein','rwanda','congodrc','jersey','paraguay','bangladesh','guam','guernsey','macau','mayotte','monaco','guatemala','kenya','isleofman','frenchguiana','jamaica','madagascar','togo','barbados','zambia','uganda','usvirginislands','ethiopia','maldives','elsalvador','tanzania','equatorialguinea','djibouti','mali','mongolia','saintmartin','dominica','niger','eswatini','bahamas','namibia','suriname','haiti','guinea','benin','mozambique','gabon','seychelles','grenada','eritrea','laos','guyana','zimbabwe','myanmar','fiji','syria','vaticancity','angola','nepal','congo','caboverde','somalia','saintlucia','sudan','gambia','chad','centralafricanrepublic','saintbarthelemy','bhutan','antiguaandbarbuda','liberia','mauritania','guineabissau','belize','nicaragua','stvincentandthegrenadines','libya','timorleste','papuanewguinea']
 
-bot_la = corona.get_louisiana_bot()
-bot_us = corona.get_us_bot()
+generic_message = "To get the most recent COVID-19 stats, text the name of a Louisiana parish, US state, or country.\n\nText TOTAL to get the stats for the world.\n\nText SOURCE to know where the numbers come from."
+
+def clean_text(txt):
+    return txt.lower().strip().replace(".","").replace(" ","")
+
+def format_response_for_cases(json_object):
+    if json_object == "":
+        return generic_message
+
+    displayName = json_object['displayName']
+    confirmed = json_object['totalConfirmed']
+    deaths = json_object['totalDeaths']
+    recovered = json_object['totalRecovered']
+
+    return ("Cases in {0}: {1} confirmed, {2} recovered, {3} deaths".
+        format(displayName, confirmed, recovered, deaths))
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -19,57 +36,79 @@ app.config.from_object(__name__)
 @app.route("/sms", methods=['GET', 'POST'])
 def incoming_sms():
     """ Get the incoming message the user sent our Twilio number """
-    body = request.values.get('Body', None)
-    stripped_body = corona.clean_text(body)
-    print(stripped_body)
-
     resp = MessagingResponse()
 
-    if stripped_body == "source":
-        us = 'https://www.worldometers.info/coronavirus/country/us/'
-        la = 'http://ldh.la.gov/Coronavirus/'
-        resp.message("For more info on Louisiana stats, go to {0}. \n\nFor more info on US stats, go to {1}".format(la,us))
+    body = request.values.get('Body', None)
+    search_term = clean_text(body)
+    print(search_term)
 
-    # Gets the total for the US
-    elif stripped_body in ["total", "all", "usa", "us", "united states"]:
-        total_row = corona.get_us_state(bot_us, '<strong>total:</strong>', is_total = True)
-        total_cases = total_row.TotalCases.values[0]
-        new_cases = total_row.NewCases.values[0] or 0
-        total_deaths = total_row.TotalDeaths.values[0]
-        new_deaths = total_row.NewDeaths.values[0] or 0
-        resp.message("Total cases in the US: {0} cases ({1} new) and {2} deaths ({3} new)".
-            format(total_cases, new_cases, total_deaths, new_deaths))
+    bing_json = requests.get(url = "https://bing.com/covid/data")
 
-    # Gets the total for each state
-    elif stripped_body in us_states:
-        state = corona.get_us_state(bot_us, stripped_body, is_total = False)
-        print(state)
+    ### Special Cases ######################################
+    if ("china" in search_term):
+        search_term = "chinamainland"
+    if ("usa" in search_term):
+        search_term = "unitedstates"
+    ########################################################
 
-        state_name = state.State.values[0]
-        total_cases = state.TotalCases.values[0]
-        new_cases = state.NewCases.values[0]  or 0
-        case_percent = str("{:.1f}".format(state.CasePercentInc.values[0] * 100)) + "%"
-        total_deaths = state.TotalDeaths.values[0] or 0
-        new_deaths = state.NewDeaths.values[0] or 0
-        death_percent = str("{:.1f}".format(state.DeathPercentInc.values[0] * 100)) + "%"
+    if search_term == "source":
+        resp.message("For more information on where the data comes from, go to {0}".
+            format("https://bing.com/covid/data"))
 
-        if new_cases == 0 or new_deaths == 0:
-           resp.message("{0} has {1} cases and {2} deaths".
-                format(state_name, total_cases, total_deaths))
-        else:
-            resp.message("{0} has {1} cases ({2} new, {3} inc) and {4} deaths ({5} new, {6} inc)".
-                format(state_name, total_cases, new_cases, case_percent,
-                    total_deaths, new_deaths, death_percent))
+    # helpful message
+    elif search_term in ["hello", "hi", "yo", "corona", "covid"]:
+        resp.message(generic_message)
+        return str(resp)
 
+    # global
+    elif search_term in ["total", "global", "world"]:
+        resp.message("Total cases in the world: {0} confirmed, {1} recovered, {2} deaths.".
+            format(
+                bing_json.json()['totalConfirmed'], 
+                bing_json.json()['totalRecovered'], 
+                bing_json.json()['totalDeaths']))
+
+     # Total for each country
+    elif search_term in countries:
+        mycountry = ""
+        for country in bing_json.json()['areas']:
+            if country['id'] == search_term:
+                mycountry = country
+                break
+                print ("found:", country['id'], country['displayName'], country['totalConfirmed'])
+
+        resp.message(format_response_for_cases(mycountry))
+       
+
+    # Total for each US state
+    elif search_term in us_states:
+        mystate = ""
+        for country in bing_json.json()['areas']:
+            if country['id'] == "unitedstates":
+                for state in country['areas']:
+                    if search_term in state['id']:
+                        mystate = state
+                        print (state['displayName'], state['totalConfirmed'])
+        
+        resp.message(format_response_for_cases(mystate))
+               
     # Gets the total for each Louisiana parish
-    elif stripped_body in louisiana_parishes:
-        parish = corona.get_parish(bot_la, stripped_body)
-        cases = parish.Cases.values[0]
-        deaths = parish.Deaths.values[0]
-        resp.message("{0} Parish has {1} cases and {2} deaths".format(parish.Parish.values[0], cases, deaths))
+    elif search_term in louisiana_parishes:
+        print("Louisiana Parish!")
+        myparish = ""
+        for country in bing_json.json()['areas']:
+            if country['id'] == "unitedstates":
+                for state in country['areas']:
+                    if "louisiana" in state['id']:
+                        for parish in state['areas']:
+                            if search_term in parish['id']:
+                                myparish = parish
+                                print(parish['id'])    
+
+        resp.message(format_response_for_cases(myparish))
 
     else:
-        resp.message("To get the most recent COVID-19 stats, text the name of a Louisiana parish or a US State. \n\nText TOTAL to get the stats for the entire country. \n\nText SOURCE to know where the numbers come from.")
+        resp.message(generic_message)
 
     return str(resp)
 
