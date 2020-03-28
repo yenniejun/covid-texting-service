@@ -2,7 +2,7 @@
 
 This is a texting service that allows you stay updated on the COVID-19 statistics for your region.
 
-Currently, I am focusing on my home state of Louisiana. Therefore, you can text the name of any Louisiana Parish, and you will immediately get the number of cases and deaths in that parish. You can also text the name of any US State and get the stats for those as well. Eventually, I would like to be able to support all of the states and territories in the US.
+You can query the latest coronavirus statistics on cases (confirmed, recovered, and deaths) at a global-level, country-level, and US state-level. Further, you can get the latest coronavirus statistics for each parish in Louisiana (my home state).
 
 _             |  _
 :-------------------------:|:-------------------------:
@@ -13,7 +13,6 @@ _             |  _
 ## Built With
 * [Twilio](https://www.twilio.com/)
 * [Flask](https://palletsprojects.com/p/flask/)
-* [Selenium](https://selenium-python.readthedocs.io/)
 * [ngrok](https://ngrok.com/)
 
 ## Why Texting Service?
@@ -29,11 +28,9 @@ Note: Louisiana currently has a texting service (text LACOVID to 898211), but it
 
 
 ## Stats
-I am getting my stats for Louisiana from the [Louisiana CDC site](http://ldh.la.gov/Coronavirus/). 
+I am getting my stats from the [Bing API Portal](https://bing.com/covid). You can find the details about the api [here](https://www.programmableweb.com/api/bing-covid-19-data-rest-api-v10). You can find the API endpoint [here](https://bing.com/covid/data).
 
-I am getting my stats for the U.S. States from [Worldometers](https://www.worldometers.info/coronavirus/country/us/). I scrape these stats using Selenium from the respective sites and pull the live numbers.
-
-
+I tried out several different coronavirus API endpoints and scraping differnet sites myself. Of all of these, I found that the Bing API provided the most accurate, up-to-date, and easiest-to-use stats.
 
 
 # Getting Started
@@ -44,24 +41,36 @@ To set up this service locally, you will need to set up the twilio service and t
 
 ```git clone https://github.com/yenniejun/covid-texting-service.git```
 
-2. Install a [Chrome Driver](https://chromedriver.chromium.org/)
-3. Activate virtual environment and install selenium
+2. Install twilio
+```
+npm install twilio-cli -g
+pip install twilio
+```
+
+3. Download and setup [ngrok](https://ngrok.com/download)
+
+4. Install and activate [virtual environment](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
 ```
 pip install virtualenv
+python3 -m venv env
 source venv/bin/activate
-pip install selenium
 ```
-4. I would recommend following the set-up steps in the [twilio tutorial](https://www.twilio.com/docs/sms/quickstart/python-msg-svc). This will help you get a phone number, connect the number with the local backend, and to setup ngrok.
+Once you have virtual environment set up, install the dependencies
+```
+venv/bin/pip install -r requirements.txt
+```
+<br/>
+
+<b>Note</b>: I would recommend following the set-up steps in the [twilio tutorial](https://www.twilio.com/docs/sms/quickstart/python-msg-svc). This will help you get a phone number, connect the number with the local backend, and to setup ngrok. In this process, you will install twilio, flask, and other required libraries
+
 
 # Usage
-In Terminal, you should have ngrok open in one tab and the Flask application in another.
+To run locally, run the following twilio-cli command in the terminal. This will run ngrok and expose the service to the Internet. 
 
-To run locally, run ngrok to expose the service to the Internet.
+`twilio phone-numbers:update "+1xxxxxxxxxx" --sms-url="http://localhost:5000/sms"
+`
 
-`ngrok http 5000`
-
-
-Once you have ngrok running, you can run the Flask application.
+Open another terminal window and run the Flask application.
 
 `
 python3 run.py
@@ -73,17 +82,32 @@ ngrok             |  flask
 ![](/img/ngrok.png)  |  ![](/img/runpy.png)
 
 
-Text "HELLO" from your phone to the phone number to get started. Debug statements will show up on the Terminal window running the application.
+Text "HELLO" from your phone to the phone number to get started. 
 
+Debug statements will show up on the Terminal window running the application.
+To turn off debug statements, locate the following line in `run.py` and set `debug=False`
+```
+if __name__ == "__main__":
+    app.run(debug=True)
+```
 
 # Looking Forward
-* Investigate more accurate source of stats
-* Investigate an efficient way of auto-refresh
-* Investigate a caching system... Currently I am pulling each time ... Since the numbers on the official sites do not update actually real-time, I don't need to use the chrome webdriver with each query... I can simluate real-time by pulling every hour or whatever number makes the most sense. TODO figure this out
-* Support typos or slight mispellings of regions
+* Investigate more accurate source of stats - currently am pulling from Bing API, which seems to be the most accurate one I've found so far.
+* Allow local searches beyond the scope of Louisiana (i.e. searching by city, counties, etc)
+* Allow a more robust search that supports typos or slight mispellings of regions 
 * Support state abbreviations (i.e. LA finds Louisiana)
-* I want to create an email service using the same scraping service for Live COVID updates. Users can sign up for how often they want updates (once a day? real-time?) and for the regions that affect them the most (i.e. local, state, country) as well as family or friends that reside in different regions.
+* Provide useful (but concise) information about COVID (keeping in mind that the target of this service is for people without internet)
+* Create an email service using the same scraping service for Live COVID updates. Users can sign up for how often they want updates (once a day? real-time?) and for the regions that affect them the most (i.e. local, state, country) as well as family or friends that reside in different regions.
+
+
+# Resources
+* I found [Worldometers](https://www.worldometers.info/coronavirus/country/us/) pretty accurate overall. The numbers here are comparable to the ones from the Bing API
+* [ProgrammableWeb](https://www.programmableweb.com/news/apis-to-track-coronavirus-covid-19/review/2020/03/27) lists various different APIs that are currently tracking COVID-19 numbers across the world
+* [Covid Tracking Project](https://covidtracking.com/)
+* [Corona Data Scraper](https://coronadatascraper.com/#home)
+* [Covid19api](https://covid19api.com/)
 
 
 # Acknowledgements
-I was inspired by this blog post: [How To Track Coronavirus In Your Country with Python](https://towardsdatascience.com/how-to-track-coronavirus-with-python-a5320b778c8e) 
+* I was inspired by this blog post: [How To Track Coronavirus In Your Country with Python](https://towardsdatascience.com/how-to-track-coronavirus-with-python-a5320b778c8e) 
+* [Bing API Portal](https://bing.com/covid) for providing the API and stats
