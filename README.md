@@ -13,7 +13,7 @@ _             |  _
 ## Built With
 * [Twilio](https://www.twilio.com/)
 * [Flask](https://palletsprojects.com/p/flask/)
-* [ngrok](https://ngrok.com/)
+* [Heroku](https://devcenter.heroku.com/articles/getting-started-with-python)
 
 ## Why Texting Service?
 
@@ -47,7 +47,7 @@ npm install twilio-cli -g
 pip install twilio
 ```
 
-3. Download and setup [ngrok](https://ngrok.com/download)
+3. Download and setup [ngrok](https://ngrok.com/download) (For running locally)
 
 4. Install and activate [virtual environment](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
 ```
@@ -65,7 +65,9 @@ venv/bin/pip install -r requirements.txt
 
 
 # Usage
-To run locally, run the following twilio-cli command in the terminal. This will run ngrok and expose the service to the Internet. 
+
+## Locally
+To run locally, run the following twilio-cli command in the terminal. This will run [ngrok](https://ngrok.com/) and expose the service to the Internet. 
 
 `twilio phone-numbers:update "+1xxxxxxxxxx" --sms-url="http://localhost:5000/sms"
 `
@@ -90,6 +92,7 @@ To turn off debug statements, locate the following line in `run.py` and set `deb
 if __name__ == "__main__":
     app.run(debug=True)
 ```
+
 
 # Looking Forward
 * Investigate more accurate source of stats - currently am pulling from Bing API, which seems to be the most accurate one I've found so far.
