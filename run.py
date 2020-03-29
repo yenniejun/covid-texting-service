@@ -58,7 +58,7 @@ def incoming_sms():
 
     if search_term == "source":
         resp.message("For more information on where the data comes from, go to {0}".
-            format("https://bing.com/covid/data"))
+            format("https://bing.com/covid"))
 
     # helpful message
     elif search_term in ["hello", "hi", "yo", "corona", "covid"]:
