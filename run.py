@@ -39,6 +39,10 @@ def incoming_sms():
     resp = MessagingResponse()
 
     body = request.values.get('Body', None)
+
+    if (body is None):
+        return resp.message(generic_message)
+
     search_term = clean_text(body)
     print(search_term)
 
