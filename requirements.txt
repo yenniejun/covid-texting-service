@@ -2,3 +2,6 @@ Flask>=0.12
 twilio~=6.0.0
 Flask-Mail
 requests
+gunicorn
+Jinja2
+urllib3
