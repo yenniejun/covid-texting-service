@@ -41,7 +41,8 @@ def incoming_sms():
     body = request.values.get('Body', None)
 
     if (body is None):
-        return resp.message(generic_message)
+        resp.message("THERE IS NO BODY!!! IS IT A ZOMBIE?")
+        return str(resp)
 
     search_term = clean_text(body)
     print(search_term)
