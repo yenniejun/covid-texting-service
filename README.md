@@ -28,9 +28,13 @@ Note: Louisiana currently has a texting service (text LACOVID to 898211), but it
 
 
 ## Stats
-I am getting my stats from the [Bing API Portal](https://bing.com/covid). You can find the details about the api [here](https://www.programmableweb.com/api/bing-covid-19-data-rest-api-v10). You can find the API endpoint [here](https://bing.com/covid/data).
+
+I am pulling my data from the [COVID19 Real-Time Data REST API v1.0](https://github.com/ChrisMichaelPerezSantiago/covid19) built by Chris Michael. You can reach the API endpoint [here](https://covid19-server.chrismichael.now.sh/api/v1). More details [here](https://www.programmableweb.com/api/covid19-real-time-data-rest-api-v10)
 
 I tried out several different coronavirus API endpoints and scraping differnet sites myself. Of all of these, I found that the Bing API provided the most accurate, up-to-date, and easiest-to-use stats.
+
+Initially, I was getting my stats from the [Bing API Portal](https://bing.com/covid). You can find the details about the api [here](https://www.programmableweb.com/api/bing-covid-19-data-rest-api-v10). You can find the API endpoint [here](https://bing.com/covid/data). However, unfortunately, as of March 31, the API has become restricted so I was unable to use it anymore.
+
 
 
 # Getting Started
@@ -113,4 +117,4 @@ if __name__ == "__main__":
 
 # Acknowledgements
 * I was inspired by this blog post: [How To Track Coronavirus In Your Country with Python](https://towardsdatascience.com/how-to-track-coronavirus-with-python-a5320b778c8e) 
-* [Bing API Portal](https://bing.com/covid) for providing the API and stats
+* [COVID19 Real-Time Data REST API v1.0](https://github.com/ChrisMichaelPerezSantiago/covid19) built by Chris Michael, for providing the API and stats
