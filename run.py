@@ -10,7 +10,7 @@ import time
 
 generic_message = "To get the most recent COVID-19 stats, text the name of a US county/parish/borough, US state, or global country.\n\nText TOTAL to get the stats for the world.\n\nText SOURCE to know where the numbers come from.\n\nText TIME to know when the numbers were last refreshed."
 bing_json = {}
-starttime = time.time()
+starttime = 0
 
 def clean_text(txt):
     return ''.join(txt.lower().strip().replace(".","").replace(",",""))
@@ -152,6 +152,7 @@ def incoming_sms():
 
     elif search_term == "time":
         sec_since_refresh = time.time() - starttime
+        print("TIME: {0} ... starttime: {1}".format(time.time(), starttime))
         if sec_since_refresh < 120:
             resp.message("The numbers were last refreshed {0} seconds ago".format(round(sec_since_refresh)))
         else:
