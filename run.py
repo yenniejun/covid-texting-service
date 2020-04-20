@@ -5,9 +5,12 @@ import string
 import re
 import json
 import entity_names as en
+import time
 
 
-generic_message = "To get the most recent COVID-19 stats, text the name of a US county/parish/borough, US state, or global country.\n\nText TOTAL to get the stats for the world.\n\nText SOURCE to know where the numbers come from."
+generic_message = "To get the most recent COVID-19 stats, text the name of a US county/parish/borough, US state, or global country.\n\nText TOTAL to get the stats for the world.\n\nText SOURCE to know where the numbers come from.\n\nText TIME to know when the numbers were last refreshed."
+bing_json = {}
+starttime = time.time()
 
 def clean_text(txt):
     return ''.join(txt.lower().strip().replace(".","").replace(",",""))
@@ -51,7 +54,7 @@ def get_state_name_from_county_parent_id(parentId):
 
 def get_county(search_term, bing_json):
     my_state=''
-    print("HELP", search_term)
+    print("Searching for county", search_term)
     
     my_state=''
     splitted = search_term.rsplit(' ',1)
@@ -104,9 +107,11 @@ def get_county(search_term, bing_json):
         return('')   
             
 
-bing_json = requests.get(url = "https://bing.com/covid/data")   
-
-
+def get_bing_json():
+    global starttime
+    print("Fetching new data... it has been {0} seconds".format(time.time() - starttime), )
+    starttime=time.time()
+    return requests.get(url = "https://bing.com/covid/data") 
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -116,6 +121,12 @@ app.config.from_object(__name__)
 def incoming_sms():
     """ Get the incoming message the user sent our Twilio number """
     resp = MessagingResponse()
+
+    global bing_json
+
+    # Fetching every 30 minutes or 1800 seconds
+    if not bing_json or time.time() - starttime > 1800:
+        bing_json = get_bing_json()
 
     body = request.values.get('Body', None)
 
@@ -138,6 +149,14 @@ def incoming_sms():
     if search_term == "source":
          resp.message("For more information on where the data comes from, go to {0}".
             format("https://bing.com/covid"))
+
+    elif search_term == "time":
+        sec_since_refresh = time.time() - starttime
+        if sec_since_refresh < 120:
+            resp.message("The numbers were last refreshed {0} seconds ago".format(round(sec_since_refresh)))
+        else:
+            resp.message("The numbers were last refreshed {0} minutes ago".format(round(sec_since_refresh)))
+
 
     # helpful message
     elif search_term in ["hello", "hi", "yo", "corona", "covid", "covid-19", "covid19"]:

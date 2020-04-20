@@ -33,6 +33,7 @@ I am pulling my data from the [Bing API Portal](https://bing.com/covid). You can
 
 I tried out several different coronavirus API endpoints and scraping different sites myself. Of all of these, I found that the Bing API provided the most accurate, up-to-date, and easiest-to-use stats.
 
+To ensure I do not get throttled, I am pulling every 30 minutes (1800 seconds). 
 
 
 # Getting Started
