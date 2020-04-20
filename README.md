@@ -2,7 +2,7 @@
 
 This is a texting service that allows you stay updated on the COVID-19 statistics for your region.
 
-You can query the latest coronavirus statistics on cases (confirmed, recovered, and deaths) at a global-level, country-level, and US state-level. Further, you can get the latest coronavirus statistics for each parish in Louisiana (my home state).
+You can query the latest coronavirus statistics on cases (confirmed, recovered, and deaths) at a global-level, country-level, US state-level, or US county-level (i.e. county, borough, or parish).
 
 _             |  _
 :-------------------------:|:-------------------------:
@@ -29,13 +29,9 @@ Note: Louisiana currently has a texting service (text LACOVID to 898211), but it
 
 ## Stats
 
-I am pulling my data from the [COVID19 Real-Time Data REST API v1.0](https://github.com/ChrisMichaelPerezSantiago/covid19) built by Chris Michael. You can reach the API endpoint [here](https://covid19-server.chrismichael.now.sh/api/v1). More details [here](https://www.programmableweb.com/api/covid19-real-time-data-rest-api-v10).
+I am pulling my data from the [Bing API Portal](https://bing.com/covid). You can find the details about the api [here](https://www.programmableweb.com/api/bing-covid-19-data-rest-api-v10). You can find the API endpoint [here](https://bing.com/covid/data). 
 
-I tried out several different coronavirus API endpoints and scraping differnet sites myself. Of all of these, I found that the Bing API provided the most accurate, up-to-date, and easiest-to-use stats.
-
-The caveat is that the stats and the services are changing daily, so this section will probably updated a few more times to keep this service running.
-
-Initially, I was getting my stats from the [Bing API Portal](https://bing.com/covid). You can find the details about the api [here](https://www.programmableweb.com/api/bing-covid-19-data-rest-api-v10). You can find the API endpoint [here](https://bing.com/covid/data). However, unfortunately, as of March 31, the API has become restricted so I was unable to use it anymore.
+I tried out several different coronavirus API endpoints and scraping different sites myself. Of all of these, I found that the Bing API provided the most accurate, up-to-date, and easiest-to-use stats.
 
 
 
@@ -78,6 +74,13 @@ To run locally, run the following twilio-cli command in the terminal. This will 
 `twilio phone-numbers:update "+1xxxxxxxxxx" --sms-url="http://localhost:5000/sms"
 `
 
+If this doesn't work, you can also run the ngrok tunnel directly
+```
+ngrok http 5000
+```
+
+If you do this, make sure you note the forwarding URL (`https://<something>.ngrok.io`) and paste `https://<something>.ngrok.io/sms` into the Twilio Webhook console.
+
 Open another terminal window and run the Flask application.
 
 `
@@ -100,9 +103,14 @@ if __name__ == "__main__":
 ```
 
 
+## Deployment
+Make sure to log onto the [Twilio console](https://www.twilio.com/) -> Phone numbers -> click your phone number -> Messaging. Make sure for "A Message Comes In", "Webhook" is selected in the dropdown.
+![](/img/twilio_console.png) 
+
+
+
 # Looking Forward
 * Investigate more accurate source of stats - currently am pulling from Bing API, which seems to be the most accurate one I've found so far.
-* Allow local searches beyond the scope of Louisiana (i.e. searching by city, counties, etc)
 * Allow a more robust search that supports typos or slight mispellings of regions 
 * Support state abbreviations (i.e. LA finds Louisiana)
 * Provide useful (but concise) information about COVID (keeping in mind that the target of this service is for people without internet)
@@ -110,13 +118,23 @@ if __name__ == "__main__":
 
 
 # Resources
-* I found [Worldometers](https://www.worldometers.info/coronavirus/country/us/) pretty accurate overall. The numbers here are comparable to the ones from the Bing API
+* [Worldometers](https://www.worldometers.info/coronavirus/country/us/) 
+* [Bing API](https://bing.com/covid/data)
+* [COVID19 Real-Time Data REST API v1.0](https://github.com/ChrisMichaelPerezSantiago/covid19) built by Chris Michael. You can reach the API endpoint [here](https://covid19-server.chrismichael.now.sh/api/v1). More details [here](https://www.programmableweb.com/api/covid19-real-time-data-rest-api-v10).
 * [ProgrammableWeb](https://www.programmableweb.com/news/apis-to-track-coronavirus-covid-19/review/2020/03/27) lists various different APIs that are currently tracking COVID-19 numbers across the world
 * [Covid Tracking Project](https://covidtracking.com/)
 * [Corona Data Scraper](https://coronadatascraper.com/#home)
 * [Covid19api](https://covid19api.com/)
+* [NYT](https://github.com/nytimes/covid-19-data)
+* [Covid Tracking](https://covidtracking.com/) (The Atlantic)
 
 
 # Acknowledgements
 * I was inspired by this blog post: [How To Track Coronavirus In Your Country with Python](https://towardsdatascience.com/how-to-track-coronavirus-with-python-a5320b778c8e) 
-* [COVID19 Real-Time Data REST API v1.0](https://github.com/ChrisMichaelPerezSantiago/covid19) built by Chris Michael, for providing the API and stats
+* [Bing API](https://bing.com/covid/data)
+
+
+
+
+
+
