@@ -155,7 +155,7 @@ def incoming_sms():
         if sec_since_refresh < 120:
             resp.message("The numbers were last refreshed {0} seconds ago".format(round(sec_since_refresh)))
         else:
-            resp.message("The numbers were last refreshed {0} minutes ago".format(round(sec_since_refresh)))
+            resp.message("The numbers were last refreshed {0} minutes ago".format(round(sec_since_refresh/60)))
 
 
     # helpful message
