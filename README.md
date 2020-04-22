@@ -9,6 +9,7 @@ _             |  _
 ![](/img/text_screenshot_1.png)  |  ![](/img/text_screenshot_2.png)
 
 # About the Project
+This project is a texting service that 
 
 ## Built With
 * [Twilio](https://www.twilio.com/)
@@ -54,6 +55,11 @@ Then, I am doing some *very* preliminary question-answer matching. Eventually I'
 
 **Note**
 This is a very preliminary version of Q&A. I realize there are a lot of messy manual matching and heuristic decisions being made.
+
+
+_             |  _
+:-------------------------:|:-------------------------:
+![](/img/text_screenshot_3.png)  |  ![](/img/text_screenshot_4.png)
 
 
 # Getting Started
