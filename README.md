@@ -19,7 +19,6 @@ _             |  _
 
 The reason I created a texting service is to ensure that even those without Internet can access the latest stats on COVID in their region. There are currently a lot of numbers and resources on many different websites, but they are not accessible to those without Internet access. 
 
-
 According to a [2019 Pew Research survey](https://www.pewresearch.org/fact-tank/2019/04/22/some-americans-dont-use-the-internet-who-are-they/), 10% of Americans (nearly 33 million people) do not use the Internet. In [Louisiana](https://broadbandnow.com/Louisiana), over 400,000 people do not have access to a wired connection capable of 25mbps download speeds, and 262,000 people do not have any wired Internet providers available where they live. 
 
 However, most people have texting, and a service like this would make it easier to access the most up-to-date COVID numbers for the areas that you care most about - at the state level as well as at the local (parish) level.
@@ -28,12 +27,33 @@ Note: Louisiana currently has a texting service (text LACOVID to 898211), but it
 
 
 ## Stats
+`cases.py`
 
 I am pulling my data from the [Bing API Portal](https://bing.com/covid). You can find the details about the api [here](https://www.programmableweb.com/api/bing-covid-19-data-rest-api-v10). You can find the API endpoint [here](https://bing.com/covid/data). 
 
 I tried out several different coronavirus API endpoints and scraping different sites myself. Of all of these, I found that the Bing API provided the most accurate, up-to-date, and easiest-to-use stats.
 
 To ensure I do not get throttled, I am pulling every 30 minutes (1800 seconds). 
+
+## Q&A
+`bot.py`
+
+I am scraping my answers from the "Frequently Asked Questions" sections from the following sites:
+* [WHO]('https://www.who.int/news-room/q-a-detail/q-a-coronaviruses')
+* [CDC]('https://www.cdc.gov/coronavirus/2019-ncov/faq.html')
+* [FDA]('https://www.fda.gov/emergency-preparedness-and-response/coronavirus-disease-2019-covid-19/coronavirus-disease-2019-covid-19-frequently-asked-questions'
+)
+* [Johns Hopskins Medicine]('https://www.hopkinsmedicine.org/health/conditions-and-diseases/coronavirus/coronavirus-frequently-asked-questions'
+)
+* [CNN]('https://www.cnn.com/interactive/2020/health/coronavirus-questions-answers/') 
+
+Then, I am doing some *very* preliminary question-answer matching. Eventually I'd like to build a model, but for now, I'm just using heuristics:
+* string similarity (Levenshtein)
+* cosine similarity
+* keyword matching
+
+**Note**
+This is a very preliminary version of Q&A. I realize there are a lot of messy manual matching and heuristic decisions being made.
 
 
 # Getting Started

@@ -1,122 +1,39 @@
 from flask import Flask, request, session
 from twilio.twiml.messaging_response import MessagingResponse
-import requests
-import string
-import re
-import json
-import entity_names as en
 import time
+import requests
+import re
+import logging
+import utility
+import cases
+import bot
+
+logFormatter = '%(asctime)s - %(levelname)s - %(message)s'
+logging.basicConfig(
+    level=logging.NOTSET,
+    format=logFormatter, 
+    handlers=[logging.StreamHandler()])
+logging.root.setLevel(logging.NOTSET)
+logger = logging.getLogger(__name__)
 
 
-generic_message = "To get the most recent COVID-19 stats, text the name of a US county/parish/borough, US state, or global country.\n\nText TOTAL to get the stats for the world.\n\nText SOURCE to know where the numbers come from.\n\nText TIME to know when the numbers were last refreshed."
 bing_json = {}
 starttime = 0
 
-def clean_text(txt):
-    return ''.join(txt.lower().strip().replace(".","").replace(",",""))
-
-# https://stackoverflow.com/questions/1823058/how-to-print-number-with-commas-as-thousands-separators
-# 123,456,789
-def format_num(num):
-    if num != None: return f'{num:,}'
-    else: return num
-
-def format_response_for_cases(json_object): 
-    if json_object == "":
-        return generic_message
-
-    if '!!!' in json_object:
-        return json_object['!!!']
-    
-    displayName = json_object["displayName"]
-    confirmed = format_num(json_object["totalConfirmed"])
-    deaths = format_num(json_object["totalDeaths"])
-    recovered = format_num(json_object["totalRecovered"])
-
-    parent_name = get_state_name_from_county_parent_id(json_object['parentId'])
-    print("PARENT", parent_name)
-
-    if any([a in displayName for a in ['Parish', 'County', 'Borough', 'City']]):
-        displayName = displayName + ', ' + parent_name
-
-    return ("Cases in {0}: \n{1} confirmed \n{2} recovered \n{3} deaths".
-        format(displayName, confirmed, recovered, deaths))
-
-def get_state_name_from_county_parent_id(parentId):
-    parentName = parentId.split('_')[0].capitalize()
-    sep = ["West", "South", "New", "North", "Rhode"]
-
-    for s in sep:
-        if s in parentName:
-            return(s + " " + parentName.split(s)[1].capitalize())
-
-    return parentName
-
-def get_county(search_term, bing_json):
-    my_state=''
-    print("Searching for county", search_term)
-    
-    my_state=''
-    splitted = search_term.rsplit(' ',1)
-
-    # Special case for state names that are two words long
-    if "city" not in search_term:
-        for s in en.two_name_states:
-            if s in search_term:
-                splitted = search_term.rsplit(' ',2)
-                search_term = splitted[0]
-                my_state = ' '.join(splitted[-2:])
-
-    # For normal states that are one word long
-    if len(splitted) == 2:
-        if splitted[1].lower() in en.us_states_l:
-            my_state = search_term.rsplit(' ',1)[1]
-            search_term = search_term.rsplit(' ',1)[0]
-
-    print("For county:", my_state, search_term)
-            
-    matching_counties_json = []
-    
-    for country in bing_json.json()['areas']: 
-        if country['id'] == "unitedstates":                
-            for state in country['areas']:      
-                if my_state == '' or my_state in state['displayName'].lower():
-                    
-                    for county in state['areas']:
-                        if (search_term in clean_text(county['displayName'])) and (county['totalConfirmed']):
-                            print(county['displayName'], "--", state['displayName'])
-
-                            if "City" in county['displayName']:
-                                if search_term == county['displayName'].lower():
-                                    print('Found CITY special case', county['displayName'], county['totalConfirmed'])
-                                    return county
-
-                            else:
-                                matching_counties_json.append(county)
-    
-    if (len(matching_counties_json) == 0):
-        return('')
-    elif (len(matching_counties_json) == 1):
-        print('Found county:', matching_counties_json[0]['displayName'])
-        return(matching_counties_json[0])
-    elif len(matching_counties_json) > 1 and my_state == '':
-        sample_state = get_state_name_from_county_parent_id(matching_counties_json[0]['parentId'])
-        ret_msg = "Please specify the state. \nFor example: {0}, {1}".format(matching_counties_json[0]['displayName'], sample_state) 
-        return({"!!!": ret_msg})
-    else:
-        return('')   
-            
-
+      
 def get_bing_json():
     global starttime
-    print("Fetching new data... it has been {0} seconds".format(time.time() - starttime), )
+    logger.info("Fetching new BING data... it has been {0} seconds".format(time.time() - starttime), )
     starttime=time.time()
-    return requests.get(url = "https://bing.com/covid/data") 
+    response = requests.get(url = "https://bing.com/covid/data")
+    logger.info(f"Request Bing Json Response Code: {response.status_code}")
+    return response
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 
 
+generic_message = "Ask any question related to COVID-19. For example: 'What is coronavirus?' \n\nTo get the most recent stats, text the name of a location. For example: 'Cases in New York'\n\nText TOTAL to get global stats\n\nText SOURCE to know where the numbers come from\n\nText FEEDBACK with a message to leave feedback."
 @app.route("/sms", methods=['GET', 'POST'])
 def incoming_sms():
     """ Get the incoming message the user sent our Twilio number """
@@ -124,91 +41,79 @@ def incoming_sms():
 
     global bing_json
 
-    # Fetching every 30 minutes or 1800 seconds
-    if not bing_json or time.time() - starttime > 1800:
+    # Fetching every 1 hour or 3600 seconds
+    if not bing_json or time.time() - starttime > 3600:
         bing_json = get_bing_json()
 
     body = request.values.get('Body', None)
 
     if (body is None):
+        logging.error("There is no body. What is happening?")
         resp.message("THERE IS NO BODY!!! IS IT A ZOMBIE?")
         return str(resp)
 
-    search_term = clean_text(body)
-    print(search_term)
+    search_term = utility.clean_text(body)
+    logger.info(f"Search term: {search_term}")
 
-    # bing_json = requests.get(url = "https://bing.com/covid/data")   
+    # helpful message
+    if len(search_term) < 1 or search_term == "hello" or search_term == "info":
+        resp.message(generic_message)
+        return str(resp)
 
-    ### Special Cases ######################################
-    if ("china" in search_term):
-        search_term = "china (mainland)"
-    if (search_term in ["usa", "us"]):
-        search_term = "united states"
-    ########################################################
-
-    if search_term == "source":
-         resp.message("For more information on where the data comes from, go to {0}".
+    elif search_term == "source":
+        logger.debug("SOURCE")
+        resp.message("For more information on where the data comes from, go to {0}".
             format("https://bing.com/covid"))
 
     elif search_term == "time":
         sec_since_refresh = time.time() - starttime
-        print("TIME: {0} ... starttime: {1}".format(time.time(), starttime))
+        logger.debug("TIME: {0} ... starttime: {1}".format(time.time(), starttime))
         if sec_since_refresh < 120:
             resp.message("The numbers were last refreshed {0} seconds ago".format(round(sec_since_refresh)))
         else:
             resp.message("The numbers were last refreshed {0} minutes ago".format(round(sec_since_refresh/60)))
 
-
-    # helpful message
-    elif search_term in ["hello", "hi", "yo", "corona", "covid", "covid-19", "covid19"]:
-        resp.message(generic_message)
+    elif search_term.split() and search_term.split()[0] == "feedback":
+        # Write to a file
+        logger.info("FEEDBACK: {0}".format(search_term))
+        resp.message("Thank you for your feedback!")
         return str(resp)
 
     # global
-    elif search_term in ["total", "global", "world"]:
+    elif search_term == "total":
         # report = requests.get(url = "https://covid19-server.chrismichael.now.sh/api/v1/AllReports") 
         # global_stats = report.json()['reports'][0]
 
+        logger.debug(f"TOTAL cases for the world {bing_json.json()['totalConfirmed']}")
         resp.message("Total cases in the world: \n {0} confirmed \n {1} recovered \n {2} deaths".
             format(
-                format_num(bing_json.json()['totalConfirmed']),
-                format_num(bing_json.json()['totalRecovered']),
-                format_num(bing_json.json()['totalDeaths'])))
+                utility.format_num(bing_json.json()['totalConfirmed']),
+                utility.format_num(bing_json.json()['totalRecovered']),
+                utility.format_num(bing_json.json()['totalDeaths'])))
 #                global_stats['active_cases'][0]['currently_infected_patients']))
 
-     # Total for each country
-    elif search_term in en.countries_l:  
-        mycountry = ""
+    
+    elif "cases in" in search_term:
+        regexp = re.compile("cases in(.*)$")
+        case_search = regexp.search(search_term).group(1)
 
-        for country in bing_json.json()['areas']:   
-            if search_term in clean_text(country['displayName']):    
-                mycountry = country 
-                break
+        logger.debug("CASES Searching for cases in: {0}".format(case_search))
+        result = cases.handle_cases(utility.clean_text(case_search), bing_json)
+        
+        if len(result) < 1:
+            ret_mes = f"Unable to find a location of the name {case_search}.\nPlease specify the name of a US county/parish, US state, or global country.\nFor example: Cases in New York"
+            logger.warning(f"Invalid cases search, returning message: {' '.join(ret_mes.split())}")
+            result = ret_mes
+        else:
+          logger.debug("Returning result for cases")
 
-        print ("found country:", country['id'], country['displayName'], country['totalConfirmed'])
-        resp.message(format_response_for_cases(mycountry))  
+        resp.message(result)
 
-    # Total for each US state
-    elif search_term in en.us_states_l:        
-        mystate = ""    
-
-        for country in bing_json.json()['areas']:   
-            if country['id'] == "unitedstates": 
-                for state in country['areas']:
-                    if search_term in clean_text(state['displayName']):
-                        mystate = state
-                        break
-
-        print ("found state:", state['id'], state['displayName'], state['totalConfirmed'])
-        resp.message(format_response_for_cases(mystate))    
-
-    # Gets the total for each county
-    else: 
-        mycounty = get_county(search_term, bing_json) 
-        resp.message(format_response_for_cases(mycounty))
-
-    # else:
-        # resp.message(generic_message)
+    # ask a question
+    else:
+        result = bot.handle_query(search_term)
+        logger.debug(f"Returning answer to question: {' '.join(result.split())}")
+        resp.message(result)
 
     return str(resp)
 

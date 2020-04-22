@@ -1,0 +1,32 @@
+echo "export TWILIO_ACCOUNT_SID='AC1898afe142edd449c0b50c30a0c8e9bd'" > twilio.env
+echo "export TWILIO_AUTH_TOKEN='ed0213955520745716457ff304914151'" >> twilio.env
+source ./twilio.env
+
+
+
+twilio api:messaging:v1:services:create --friendly-name "My first Messaging Service"
+
+
+twilio api:messaging:v1:services:phone-numbers:remove \
+    --service-sid MGXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \
+    --sid AC1898afe142edd449c0b50c30a0c8e9bd
+
+
+twilio api:messaging:v1:services:phone-numbers:create --service-sid MGb9e9f6da9d375125326a735ab5a1f546 --phone-number-sid PN8b34cad5050f49ffe598652e4e981b2f
+
+
+twilio phone-numbers:update "+17609570407" --sms-url="http://localhost:5000/sms"
+
+twilio api:core:messages:create \
+  --from "+12252692499" \
+  --to "+12252840859" \
+  --body "I love you 3000"
+
+  twilio api:core:messages:list --to="+12252692499"   --properties="sid,from,body"
+
+
+  twilio api:core:incoming-phone-numbers:update \
+  --sid AC1898afe142edd449c0b50c30a0c8e9bd \
+  --sms-url "https://ce9202cc.ngrok.io/sms"
+
+twilio phone-numbers:update "+12252692499" --sms-url="http://localhost:5000/sms"
