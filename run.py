@@ -23,17 +23,34 @@ starttime = 0
       
 def get_bing_json():
     global starttime
-    logger.info("Fetching new BING data... it has been {0} seconds".format(time.time() - starttime), )
+    logger.info("Fetching new BING data... it has been {0} seconds".format(time.time() - starttime))
     starttime=time.time()
     response = requests.get(url = "https://bing.com/covid/data")
     logger.info(f"Request Bing Json Response Code: {response.status_code}")
+    
+    if response.status_code == 401:
+        logger.warning(f"Response code is 401")
+        # Return existing data
+        # return bing_json
+
     return response
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 
 
-generic_message = "Ask any question related to COVID-19. For example: 'What is coronavirus?' \n\nTo get the most recent stats, text the name of a location. For example: 'Cases in New York'\n\nText TOTAL to get global stats\n\nText SOURCE to know where the numbers come from\n\nText FEEDBACK with a message to leave feedback."
+def get_generic_message():
+    generic_message = "Ask any question related to COVID-19. For example: What is coronavirus? \n\nTo get the most recent stats, text the name of a location. For example: 'Cases in New York'\n\nText TOTAL to get global stats\n\nText SOURCE to know where the information comes from\n\nText FEEDBACK with a message to leave feedback."
+    generic_message_no_cases = "Ask any question related to COVID-19. For example: What is coronavirus?\n\nText SOURCE to know where the information comes from\n\nText FEEDBACK with a message to leave feedback."
+
+    if not bing_json:
+        return generic_message_no_cases
+    else:
+        return generic_message
+
+
+bing_not_working = "I'm sorry. That is not currently supported.\n\nText HELLO for information."
+
 @app.route("/sms", methods=['GET', 'POST'])
 def incoming_sms():
     """ Get the incoming message the user sent our Twilio number """
@@ -57,13 +74,15 @@ def incoming_sms():
 
     # helpful message
     if len(search_term) < 1 or search_term == "hello" or search_term == "info":
-        resp.message(generic_message)
+        resp.message(get_generic_message())
         return str(resp)
 
     elif search_term == "source":
         logger.debug("SOURCE")
-        resp.message("For more information on where the data comes from, go to {0}".
-            format("https://bing.com/covid"))
+        reply = "The answers for your questions come from creditable sources such as the CDC, WHO, and FDA. Text FEEDBACK with any other questions you may have."
+        if bing_json:
+            reply += "\n\nFor more information on the numbers, go to {0}".format("https://bing.com/covid")
+        resp.message(reply)
 
     elif search_term == "time":
         sec_since_refresh = time.time() - starttime
@@ -83,6 +102,10 @@ def incoming_sms():
     elif search_term == "total":
         # report = requests.get(url = "https://covid19-server.chrismichael.now.sh/api/v1/AllReports") 
         # global_stats = report.json()['reports'][0]
+        if not bing_json:
+            logger.warning("Unable to pull Bing data")
+            resp.message(bing_not_working)
+            return str(resp)
 
         logger.debug(f"TOTAL cases for the world {bing_json.json()['totalConfirmed']}")
         resp.message("Total cases in the world: \n {0} confirmed \n {1} recovered \n {2} deaths".
@@ -94,6 +117,11 @@ def incoming_sms():
 
     
     elif "cases in" in search_term:
+        if not bing_json:
+            logger.warning("Unable to pull Bing data")
+            resp.message(bing_not_working)
+            return str(resp)
+
         regexp = re.compile("cases in(.*)$")
         case_search = regexp.search(search_term).group(1)
 
