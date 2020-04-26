@@ -2,17 +2,31 @@ import requests
 import string
 import re
 import json
+import pandas as pd
+import time
 import entity_names as en
 import utility
 import logging
+import random
 
-logFormatter = '%(asctime)s - %(levelname)s - %(message)s'
+logFormatter = '%(asctime)s - %(levelname)s -` %(message)s'
 logging.basicConfig(
     level=logging.NOTSET,
     format=logFormatter, 
     handlers=[logging.StreamHandler()])
 logging.root.setLevel(logging.NOTSET)
 logger = logging.getLogger(__name__)
+
+apology_message = "Sorry, we are unable to support that query.\nPlease specify the name of a US county/parish, US state, or global country.\nFor example: Cases in New York"
+
+# Worldometers
+world_data = {}
+state_data = {}
+
+# NYT 
+local_data = pd.DataFrame([])
+
+starttime = time.time()
 
 def format_response_for_cases(json_object): 
     if json_object == "":
@@ -22,88 +36,137 @@ def format_response_for_cases(json_object):
         return json_object['!!!']
     
     displayName = json_object["displayName"]
-    confirmed = utility.format_num(json_object["totalConfirmed"])
-    deaths = utility.format_num(json_object["totalDeaths"])
-    recovered = utility.format_num(json_object["totalRecovered"])
 
-    parent_name = get_state_name_from_county_parent_id(json_object['parentId'])
-    logger.debug(f"PARENT: {parent_name}")
+    if type(json_object["totalConfirmed"]) != str:
+        confirmed = utility.format_num(json_object["totalConfirmed"])
+        deaths = utility.format_num(json_object["totalDeaths"])
+        recovered = utility.format_num(json_object["totalRecovered"])
+    else:
+        confirmed = json_object["totalConfirmed"]
+        deaths = json_object["totalDeaths"]
+        recovered = json_object["totalRecovered"]
 
-    if any([a in displayName for a in ['Parish', 'County', 'Borough', 'City']]):
-        displayName = displayName + ', ' + parent_name
-
-    return ("Cases in {0}: \n{1} confirmed \n{2} recovered \n{3} deaths".
+    return ("Cases in {0}: \n{1} confirmed\n{2} recovered\n{3} deaths".
         format(displayName, confirmed, recovered, deaths))
 
-def get_state_name_from_county_parent_id(parentId):
-    parentName = parentId.split('_')[0].capitalize()
-    sep = ["West", "South", "New", "North", "Rhode"]
+def fetch_data():
+    global starttime
+    global world_data
+    global state_data
+    global local_data
 
-    for s in sep:
-        if s in parentName:
-            return(s + " " + parentName.split(s)[1].capitalize())
+    if time.time() - starttime < 3600 and world_data and state_data and not local_data.empty:
+        return
 
-    return parentName
+    logger.info("Fetching new data... it has been {0} seconds".format(time.time() - starttime))
+    starttime=time.time()
 
-def get_county(search_term, bing_json):
+    # Global data
+    req_world = requests.get(url = "https://covid19-server.chrismichael.now.sh/api/v1/AllReports") 
+    logger.info(f"Request Covid19-server World Json Response Code: {req_world.status_code}")
+    
+    if req_world.status_code == 200:
+        world_data = req_world.json()
+    else:
+        logger.error(f"Response code for World Covid19-server is {req_world.status_code}")
+
+    # US State data
+    req_usa = requests.get(url="https://covid19-server.chrismichael.now.sh/api/v1/CasesInAllUSStates")
+    logger.info(f"Request Covid19-server US State Json Response Code: {req_usa.status_code}")
+
+    if req_usa.status_code == 200:
+        state_data = req_usa.json()
+    else:
+        logger.error(f"Response code for USA State Covid19-server is {req_usa.status_code}")
+
+    # Local data
+    local_data = pd.read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv')
+
+
+def get_last_refreshed_time():
+    sec_since_refresh = time.time() - starttime
+    logger.debug("TIME: {0} ... starttime: {1}".format(time.time(), starttime))
+    if sec_since_refresh < 120:
+        return("The numbers were last refreshed {0} seconds ago".format(round(sec_since_refresh)))
+    else:
+        return("The numbers were last refreshed {0} minutes ago".format(round(sec_since_refresh/60)))
+
+def get_total_cases():
+    fetch_data()
+    if (not world_data):
+        logger.error("No world data is available to fetch...")
+        return(apology_message)
+
+    global_stats = world_data['reports'][0]
+
+    logger.debug(f"TOTAL cases for the world from covid19server {global_stats['cases']}")
+
+    return(utility.format_total_cases({
+        'totalConfirmed':global_stats['cases'],
+        'totalRecovered': global_stats['recovered'],
+        'totalDeaths':global_stats['deaths']}))
+
+
+def get_state_name_for_county_query(query):
     my_state=''
-    splitted = search_term.rsplit(' ',1)
+    my_county=query
 
     # Special case for state names that are two words long
-    if "city" not in search_term:
-        for s in en.two_name_states:
-            if s in search_term:
-                splitted = search_term.rsplit(' ',2)
-                search_term = splitted[0]
-                my_state = ' '.join(splitted[-2:])
-
+    for s in en.two_name_states:
+        last_two_words = ' '.join(query.rsplit(' ',2)[-2:])
+        if s in last_two_words:
+            splitted = query.rsplit(' ',2)
+            my_county = splitted[0]
+            my_state = ' '.join(splitted[-2:])
+            return (my_county, my_state)
+            
+    splitted = query.rsplit(' ',1)
+            
     # For normal states that are one word long
     if len(splitted) == 2:
         if splitted[1].lower() in en.us_states_l:
-            my_state = search_term.rsplit(' ',1)[1]
-            search_term = search_term.rsplit(' ',1)[0]
+            my_state = query.rsplit(' ',1)[1]
+            my_county = query.rsplit(' ',1)[0]
 
-    logger.info("Searching for county {0} in state {1}".format(search_term, my_state))
-            
-    matching_counties_json = []
-    
-    for country in bing_json.json()['areas']: 
-        if country['id'] == "unitedstates":                
-            for state in country['areas']:      
-                if my_state == '' or my_state in state['displayName'].lower():
-                    
-                    for county in state['areas']:
-                        if (search_term in utility.clean_text(county['displayName'])) and (county['totalConfirmed']):
-                            logger.debug(f"{county['displayName']}, {state['displayName']}")
+    logger.debug(f"get_state_name_for_county_query: my county {my_county}, my state {my_state}")
+    return my_county, my_state
 
-                            if "City" in county['displayName']:
-                                if search_term == county['displayName'].lower():
-                                    logger.debug(f"Found CITY special case: {county['displayName']}")
-                                    return county
 
-                            else:
-                                matching_counties_json.append(county)
-    
-    if (len(matching_counties_json) == 0):
-        return('')
-    elif (len(matching_counties_json) == 1):
-        logger.info(f"Found county: {matching_counties_json[0]['displayName']}")
-        return(matching_counties_json[0])
-    elif len(matching_counties_json) > 1 and my_state == '':
-        sample_state = get_state_name_from_county_parent_id(matching_counties_json[0]['parentId'])
-        ret_msg = "Please specify the state. \nFor example: Cases in {0}, {1}".format(matching_counties_json[0]['displayName'], sample_state) 
-        logger.warning(f"Unable to find one specific county for search term {search_term}")
-        return({"!!!": ret_msg})
+def get_county(search_term):
+    query = ' '.join([word for word in search_term.split() if word.lower() not in ["parish", "county", "borough"]])
+    my_county, my_state = get_state_name_for_county_query(query)
+
+    logger.info("Searching for county {0} in state {1}".format(my_county, my_state))
+
+    counties = local_data[local_data.county.str.lower().str.contains(my_county)].sort_values(by='date', ascending=False)
+
+    if len(counties) > 0:
+        counties = counties[counties['date'] == counties.iloc[0].date]
+        if my_state != '': counties = counties[counties['state'].str.lower() == my_state]
+        if len(counties) > 1:
+            logger.debug(f"There are {len(counties)} counties with the name {my_county} ... Please try again")
+            ret_msg = "Please specify the state. \nFor example: Cases in {0}, {1}".format(counties.iloc[0].county, counties.iloc[0].state) 
+        else:
+            logger.debug(f"Found stats for the county {my_county}")
+            ret_msg = "Cases in {0}, {1}:\n{2} confirmed\n{3} deaths".format(counties.iloc[0].county, 
+                counties.iloc[0].state,
+                utility.format_num(counties.iloc[0].cases),
+                utility.format_num(counties.iloc[0].deaths))
     else:
-        logger.warning(f"Unable to find any matching county for search term {search_term}")
-        return('')   
+        logger.warning(f"Invalid cases search, returning message: {' '.join(ret_mes.split())}")
+        ret_mes = apology_message
+
+    return ret_msg
 
 
-def handle_cases(search_term, bing_json):
+
+def handle_cases(search_term):
+
+    fetch_data()
 
     if (len(search_term.split()) < 1):
         logger.debug("CASES search term is empty. Returning early")
-        return('')
+        return(apology_message)
 
     logger.debug(f"In handle cases. Looking for {search_term}")
 
@@ -115,35 +178,51 @@ def handle_cases(search_term, bing_json):
     if ("korea" in search_term):
         search_term = "south korea"
     ########################################################
-    
-     # Total for each country
-    if search_term in en.countries_l:  
-        mycountry = ""
 
-        for country in bing_json.json()['areas']:   
-            if search_term in utility.clean_text(country['displayName']):    
-                mycountry = country 
+    if search_term in en.countries_worldometer:
+        my_country = ''
+        for country in world_data['reports'][0]['table'][0]:
+            if utility.clean_text(country['Country']) == search_term:
+                my_country = country
                 break
 
-        logger.info(f"found country with id: {country['id']}, name: {country['displayName']}, confirmed: {country['totalConfirmed']}")
-        return(format_response_for_cases(mycountry))  
+        if my_country == '':
+            # Maybe if the country code changes in the API and what I have
+            logger.warning("Could not find country for some reason...")
+            return (apology_message)
 
+        logger.debug(f"Found number of cases for {my_country['Country']}")
+
+        obj = {"totalConfirmed": my_country['TotalCases'],
+               "totalRecovered": my_country['TotalRecovered'],
+               "totalDeaths": my_country['TotalDeaths'],
+               "displayName": my_country['Country']}
+
+        return format_response_for_cases(obj)
+    
     # Total for each US state
-    elif search_term in en.us_states_l:        
-        mystate = ""    
+    elif search_term in en.us_states_worldometer:   
+        mystate = ''
+        for state in state_data['data'][0]['table']:   
+            if utility.clean_text(state['USAState']) == search_term:
+                my_state = state
+                break
 
-        for country in bing_json.json()['areas']:   
-            if country['id'] == "unitedstates": 
-                for state in country['areas']:
-                    if search_term in utility.clean_text(state['displayName']):
-                        mystate = state
-                        break
+        if my_state == '':
+            # Maybe if the country code changes in the API and what I have
+            logger.warning("Could not find state for some reason...")
+            return (apology_message)
 
-        logger.info(f"found state with id: {state['id']}, name: {state['displayName']}, confirmed: {state['totalConfirmed']}")
-        return(format_response_for_cases(mystate))    
+        logger.debug(f"Found number of cases for {my_state['USAState']}")
 
-    # Gets the total for each county
-    else: 
-        mycounty = get_county(search_term, bing_json) 
-        return(format_response_for_cases(mycounty))
+        obj = {"totalConfirmed": my_state['TotalCases'],
+               "totalRecovered": 0,
+               "totalDeaths": my_state['TotalDeaths'],
+               "displayName": my_state['USAState']}
+
+        return(format_response_for_cases(obj))    
+
+    else:
+        my_county = get_county(search_term) 
+        return(my_county)
 
