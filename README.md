@@ -30,11 +30,15 @@ Note: Louisiana currently has a texting service (text LACOVID to 898211), but it
 ## Stats
 `cases.py`
 
-I am pulling my data from the [Bing API Portal](https://bing.com/covid). You can find the details about the api [here](https://www.programmableweb.com/api/bing-covid-19-data-rest-api-v10). You can find the API endpoint [here](https://bing.com/covid/data). 
+I am getting my stats from a few sources.
 
-I tried out several different coronavirus API endpoints and scraping different sites myself. Of all of these, I found that the Bing API provided the most accurate, up-to-date, and easiest-to-use stats.
+World & US-State level:
+* [COVID19 Real-Time Data REST API v1.0](https://github.com/ChrisMichaelPerezSantiago/covid19) built by Chris Michael. You can reach the API endpoint [here](https://covid19-server.chrismichael.now.sh/api/v1). More details [here](https://www.programmableweb.com/api/covid19-real-time-data-rest-api-v10).
 
-To ensure I do not get throttled, I am pulling every 30 minutes (1800 seconds). 
+US Local level:
+* [New York Times](https://github.com/nytimes/covid-19-data)
+
+To ensure I do not get throttled, I am pulling every hour (3600 seconds). 
 
 ## Q&A
 `bot.py`
