@@ -142,7 +142,8 @@ def get_county(search_term):
 
     if len(counties) > 0:
         counties = counties[counties['date'] == counties.iloc[0].date]
-        if my_state != '': counties = counties[counties['state'].str.lower() == my_state]
+        if my_state != '': 
+            counties = counties[counties['state'].str.lower() == my_state]
         if len(counties) > 1:
             logger.debug(f"There are {len(counties)} counties with the name {my_county} ... Please try again")
             ret_msg = "Please specify the state. \nFor example: Cases in {0}, {1}".format(counties.iloc[0].county, counties.iloc[0].state) 
@@ -153,8 +154,8 @@ def get_county(search_term):
                 utility.format_num(counties.iloc[0].cases),
                 utility.format_num(counties.iloc[0].deaths))
     else:
-        logger.warning(f"Invalid cases search, returning message: {' '.join(ret_mes.split())}")
         ret_mes = apology_message
+        logger.warning(f"Invalid cases search, returning message: {ret_msg}")
 
     return ret_msg
 
