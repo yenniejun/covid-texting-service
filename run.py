@@ -20,7 +20,7 @@ app.config.from_object(__name__)
 
 source_reply = "The answers for your questions come from creditable sources such as the CDC, WHO, and FDA. The stats come from Worldometers and New York Times."
 
-generic_message = "Welcome to Silicon Harlem's COVID-19 Text Service. Text one of the following for instructions:\n\nQUESTION\nCASES\nSOURCE\nFEEDBACK"
+generic_message = "Welcome to Silicon Harlem's COVID-19 Text Service\n\nText one of the following options:\nQUESTION\nCASES\nSOURCE\nFEEDBACK\n\nMsg&data rates may apply"
 
 # generic_message = "Text QUESTION to ask something about COVID-19. \n\nText CASES to get the most recent stats.\n\nText SOURCE to know where the info comes from\n\nText FEEDBACK with a message"
     # generic_message_no_cases = "Ask any question related to COVID-19. For example: What is coronavirus?\n\nText SOURCE to know where the information comes from\n\nText FEEDBACK with a message to leave feedback"

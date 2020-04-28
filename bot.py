@@ -18,7 +18,7 @@ logging.basicConfig(
 logging.root.setLevel(logging.NOTSET)
 logger = logging.getLogger(__name__)
 
-nltk.download('stopwords', '/app/nltk_data/')
+nltk.download('stopwords')
 
 sw = stopwords.words('english')  
 protection_words = "Regularly and thoroughly clean your hands with an alcohol-based hand rub or wash them with soap and water.\nAvoid touching eyes, nose and mouth.\nStay home if you feel unwell.\nMaintain at least 1 metre (3 feet) distance between yourself and anyone who is coughing or sneezing"
