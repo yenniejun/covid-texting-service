@@ -99,8 +99,10 @@ def incoming_sms():
 
 
     if is_get_request:
+        logger.debug(f"Returning response text to EXTexting: {response_text}")
         return response_text
     else:
+        logger.debug(f"Returning response text to Twilio: {response_text}")
         resp.message(response_text)
         return str(resp)
 
