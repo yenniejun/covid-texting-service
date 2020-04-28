@@ -4,7 +4,6 @@
 if [ -f bin/post_compile ]; then
     echo "-----> Running post-compile hook"
     chmod +x bin/post_compile
-    sub-env bin/post_compile
 fi
 
 echo "-----> Post-compile done"

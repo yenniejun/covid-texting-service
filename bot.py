@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 nltk.download('stopwords')
 
 sw = stopwords.words('english')  
-protection_words = "Regularly and thoroughly clean your hands with an alcohol-based hand rub or wash them with soap and water.\nAvoid touching eyes, nose and mouth.\nStay home if you feel unwell.\nMaintain at least 1 metre (3 feet) distance between yourself and anyone who is coughing or sneezing"
+protection_words = "Regularly clean your hands with an alcohol-based hand rub or wash them with soap and water. Avoid touching eyes, nose and mouth. Stay home if you feel unwell"
 
 medical_attention_words = "If you develop emergency warning signs for COVID-19 get medical attention immediately. Warning signs include fever, cough, trouble breathing, and chest pain"
 
@@ -128,7 +128,8 @@ def handle_query(input_q):
             if ("children" in input_q): ans = answers[56]
             else: ans = answers[12]
         elif ("quarantine" in input_q):
-            ans = answers[37]
+            # ans = answers[37]
+            ans = "Quarantine means separating people exposed to a contagious disease from those who have not been exposed, in order to prevent the possible spread of that disease"
         elif any([w in input_q for w in ["vaccine", "treatment"]]):
             ans = answers[10]
         elif any([w in input_q for w in ["pet", "pets"]]):
@@ -140,7 +141,8 @@ def handle_query(input_q):
         elif "antibiotics" in input_q:
             ans = answers[8]
         elif "essential worker" in input_q:
-            ans = answers[122]
+            # ans = answers[122]
+            ans = "Critical industries, including industries such as food, drugs, and medical equipment, have a special responsibility in these times to continue operations"
         elif "diagnose" in input_q:
             ans = answers[81]
         elif "hand sanitizer" in input_q:
@@ -152,13 +154,30 @@ def handle_query(input_q):
         else:
             logger.warning(f"BOT: No good question match for question {input_q}")
             ans = get_generic_answer()
+
+    else:
+        if max_index == 0:
+            return "Coronaviruses are a large family of viruses which may cause illness in animals or humans. The most recently discovered coronavirus causes coronavirus disease COVID-19"
+        if max_index == 1:
+            return "COVID-19 is the infectious disease caused by the most recently discovered coronavirus. This new virus began in Wuhan, China, in December 2019"
+        if max_index == 7:
+            return "Older persons and persons with pre-existing medical conditions appear to develop serious illness more often than others"
+        if max_index == 9:
+            return "There is no evidence that current medicine can prevent or cure the disease. WHO does not recommend self-medication as a prevention or cure for COVID-19."
+        if max_index == 19:
+            return "The following measures ARE NOT effective against COVID-2019 and can be harmful: Smoking, wearing multiple masks, taking antibiotics"
+        if max_index == 27:
+            return "The new name of this disease is coronavirus disease 2019, abbreviated as COVID-19. In COVID-19, ‘CO’ stands for ‘corona,’ ‘VI’ for ‘virus,’ and ‘D’ for disease"
+
+
     # Truncate to under 320 character (1 SMS is 160 characters)
 
     num_sentences = ans.count('.')
-    while len(ans) > 320:
+    while len(ans) > 160:
         # print(len(ans), num_sentences)
         ans = '.'.join(ans.split('.')[:num_sentences])
         num_sentences -= 1
+
 
     if not ans or len(ans) < 1:
         ans = get_generic_answer()
