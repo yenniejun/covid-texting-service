@@ -133,6 +133,8 @@ def get_state_name_for_county_query(query):
 
 
 def get_county(search_term):
+    ret_msg = ''
+
     query = ' '.join([word for word in search_term.split() if word.lower() not in ["parish", "county", "borough"]])
     my_county, my_state = get_state_name_for_county_query(query)
 
@@ -160,7 +162,6 @@ def get_county(search_term):
     return ret_msg
 
 
-
 def handle_cases(search_term):
 
     fetch_data()
@@ -174,10 +175,11 @@ def handle_cases(search_term):
     ### Special Cases ######################################
     if ("china" in search_term):
         search_term = "china (mainland)"
-    if (search_term in ["usa", "us", "america"]):
-        search_term = "united states"
     if ("korea" in search_term):
         search_term = "south korea"
+    if any([search_term in ["united states", "unitedstates", "us", "america"]]):
+        search_term = "usa"
+
     ########################################################
 
     if search_term in en.countries_worldometer:
