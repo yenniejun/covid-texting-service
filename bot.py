@@ -203,6 +203,8 @@ def handle_query(input_q):
 
     if short_ans != '':
         ans = short_ans
+    else:
+        ans = ans[:160]
 
     if not ans or len(ans) < 1:
         ans = get_generic_answer()
