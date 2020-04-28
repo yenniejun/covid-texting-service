@@ -17,7 +17,7 @@ logging.basicConfig(
 logging.root.setLevel(logging.NOTSET)
 logger = logging.getLogger(__name__)
 
-apology_message = "Sorry, we are unable to support that query.\nPlease specify the name of a US county/parish, US state, or global country.\nFor example: Cases in New York"
+apology_message = "Please specify the name of a US county/parish, US state, or global country.\n\nFor example: Cases in New York\n\nText TOTAL to get global stats"
 
 # Worldometers
 world_data = {}

@@ -22,7 +22,9 @@ nltk.download('stopwords')
 sw = stopwords.words('english')  
 protection_words = "Regularly and thoroughly clean your hands with an alcohol-based hand rub or wash them with soap and water.\nAvoid touching eyes, nose and mouth.\nStay home if you feel unwell.\nMaintain at least 1 metre (3 feet) distance between yourself and anyone who is coughing or sneezing"
 
-medical_attention_words = "If you develop emergency warning signs for COVID-19 get medical attention immediately. Emergency warning signs include fever, cough, trouble breathing, persistent pain or pressure in the chest, new confusion or inability to arouse, bluish lips or face"
+medical_attention_words = "If you develop emergency warning signs for COVID-19 get medical attention immediately. Warning signs include fever, cough, trouble breathing, and chest pain"
+
+symptoms_words = "The most common symptoms of COVID-19 are fever, tiredness, and dry cough. Others include aches and pains, nasal congestion, runny nose, sore throat, or diarrhea"
 
 with open("corona-questions.txt", 'r') as f:
     mystring = f.read()
@@ -47,6 +49,10 @@ question_vectors = vectoriser.fit_transform(cleaned[:]).toarray()
 
 def get_generic_answer():
     return "Sorry, we are unable to answer that question.\n\nTry asking a different question. For example: {0}".format(short_questions[random.randint(0,len(short_questions)-1)])
+
+def get_generic_answer_question():
+    return "Try asking any question you have related to COVID-19. For example: {0}".format(short_questions[random.randint(0,len(short_questions)-1)])
+
 
 # https://towardsdatascience.com/calculating-string-similarity-in-python-276e18a7d33a
 
@@ -82,16 +88,21 @@ def clean_text(txt):
 def handle_query(input_q):
     logger.info(f"Question asked: {input_q}")
 
+    if input_q == "question":
+        return (get_generic_answer_question())
+
     # Take care of these first
     if any([w in input_q for w in ["handwash", "wash my hands", "washing my hands", "wash hands", "washing hands", "handwashing", "wash hand", "hand wash"]]):
         logger.debug("Returning answer for question related to handwashing")
-        return(answers[69])
+        return(answers[69].split(',')[0])
     elif any([w in input_q for w in ["get testing", "get tested", "get test", "get a test" ]]):
         logger.debug("Returning answer for question related to testing")
-        return('.'.join(answers[79].split('.')[:2]))
+        ans = '.'.join(answers[79].split('.')[:2])
+        return(ans.split(', or reach')[0])
     elif any([w in input_q for w in ["symptom", "symptoms"]]):
         logger.debug("Returning answer for question related to symptoms")
-        return('.'.join(answers[2].split('.')[:4]))
+        # ans = '.'.join(answers[2].split('.')[:4])
+        return(symptoms_words)
     elif any([w in input_q for w in ["medical attention", "doctor"]]):
         logger.debug("Returning answer for question related to medical attention")
         return(medical_attention_words)
