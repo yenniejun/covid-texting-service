@@ -168,16 +168,41 @@ def handle_query(input_q):
             return "The following measures ARE NOT effective against COVID-2019 and can be harmful: Smoking, wearing multiple masks, taking antibiotics"
         if max_index == 27:
             return "The new name of this disease is coronavirus disease 2019, abbreviated as COVID-19. In COVID-19, ‘CO’ stands for ‘corona,’ ‘VI’ for ‘virus,’ and ‘D’ for disease"
+        if max_index == 34:
+            return "COVID-19 is thought to spread mainly from person to person, mainly through respiratory droplets produced when an infected person coughs or sneezes"
+        if max_index == 48:
+            return 'CDC recommends that people wear a cloth face covering to cover their nose and mouth in the community setting.'
+        if max_index == 70:
+            return 'Clean and disinfect frequently touched surfaces such as tables, doorknobs, light switches, handles, desks, phones, keyboards, toilets, faucets, and sinks.'
+        if max_index == 71:
+            return "CDC recommends handwashing with soap and water for at least 20 seconds, or using alcohol-based hand sanitizer with at least 60% alcohol"
+        if max_index == 101:
+            return "Although we know certain bacteria and fungi can be carried on fur and hair, there is no evidence that viruses can spread to people from the fur or hair of pets."
+        if max_index == 124:
+            return "Biological products include a wide range of products such as vaccines, blood components, allergenics, gene therapy, and recombinant therapeutic proteins."
+        if max_index == 126 or max_index == 127:
+            return "Respiratory viruses are not known to be transmitted by blood transfusion, and there have been no reported cases of transfusion-transmitted coronavirus"
+        if max_index == 132:
+            return "Convalescent plasma is the liquid part of blood that is collected from patients who have recovered from the novel coronavirus disease"
+        if max_index == 147:
+            return "A sample is typically collected from your nose and/or throat with a special swab at a designated collection location staffed by healthcare professionals"
+
+
 
 
     # Truncate to under 320 character (1 SMS is 160 characters)
 
     num_sentences = ans.count('.')
-    while len(ans) > 160:
+
+    short_ans = ans
+
+    while len(short_ans) > 160:
         # print(len(ans), num_sentences)
-        ans = '.'.join(ans.split('.')[:num_sentences])
+        short_ans = '.'.join(short_ans.split('.')[:num_sentences])
         num_sentences -= 1
 
+    if short_ans != '':
+        ans = short_ans
 
     if not ans or len(ans) < 1:
         ans = get_generic_answer()
