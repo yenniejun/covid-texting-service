@@ -42,6 +42,14 @@ def incoming_sms():
         arg_from = request.args.get('from')
         body = request.args.get('message')
         logging.debug(f"Message phone number from: {arg_from}, message: {body}")
+
+    elif 'Message' in request.args:
+        is_get_request = True
+        logging.info("Servicing a GET request FIRST TIME!!!")
+        arg_from = request.args.get('PhoneNumber')
+        body = request.args.get('Message')
+        logging.debug(f"Message phone number from: {arg_from}, message: {body}")
+
     else:
         logging.info("Servicing a POST request")
         body = request.values.get('Body', None)
@@ -56,7 +64,7 @@ def incoming_sms():
     logger.info(f"Search term: {search_term}")
 
      # helpful message
-    if len(search_term) < 1 or search_term == "hello" or search_term == "info":
+    if len(search_term) < 1 or search_term == "ezcovid19" or search_term == "hello" or search_term == "info":
         response_text = generic_message
 
     elif search_term == "source":
