@@ -64,7 +64,7 @@ def incoming_sms():
     logger.info(f"Search term: {search_term}")
 
      # helpful message
-    if len(search_term) < 1 or search_term == "ezcovid19" or search_term == "hello" or search_term == "info":
+    if len(search_term) < 1 or search_term == "1usa" or search_term == "hello" or search_term == "info":
         response_text = generic_message
 
     elif search_term == "source":
