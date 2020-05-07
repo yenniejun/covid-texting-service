@@ -18,3 +18,67 @@ two_name_states = ['new hampshire', 'new york', 'new jersey', 'new mexico', 'nor
 
 us_states_worldometer = ['new york','new jersey','massachusetts','illinois','california','pennsylvania','michigan','florida','louisiana','connecticut','texas','georgia','maryland','ohio','indiana','colorado','washington','virginia','tennessee','north carolina','rhode island','missouri','arizona','alabama','wisconsin','mississippi','south carolina','iowa','nevada','utah','kentucky','delaware','district of columbia','minnesota','oklahoma','kansas','nebraska','arkansas','new mexico','oregon','south dakota','idaho','new hampshire','west virginia','maine','north dakota','vermont','hawaii','wyoming','montana','alaska','guam','northern mariana islands','puerto rico','united states virgin islands','veteran affairs','us military','navajo nation','federal prisons']
 countries_worldometer = ['world','usa','spain','italy','france','germany','uk','turkey','iran','russia','brazil','canada','belgium','netherlands','switzerland','india','peru','portugal','ecuador','ireland','sweden','saudi arabia','israel','austria','mexico','singapore','chile','pakistan','japan','poland','romania','s. korea','belarus','uae','qatar','indonesia','ukraine','denmark','serbia','philippines','norway','czechia','australia','dominican republic','malaysia','panama','bangladesh','colombia','finland','south africa','egypt','morocco','argentina','luxembourg','moldova','algeria','kuwait','thailand','kazakhstan','bahrain','greece','hungary','croatia','oman','uzbekistan','iraq','iceland','armenia','azerbaijan','estonia','cameroon','ghana','afghanistan','bosnia and herzegovina','new zealand','lithuania','slovenia','north macedonia','slovakia','cuba','bulgaria','nigeria','ivory coast','hong kong','djibouti','guinea','tunisia','bolivia','cyprus','latvia','andorra','albania','diamond princess','lebanon','niger','costa rica','kyrgyzstan','senegal','burkina faso','honduras','uruguay','san marino','channel islands','sri lanka','georgia','guatemala','malta','jordan','drc','somalia','taiwan','réunion','mayotte','mali','kenya','palestine','mauritius','venezuela','montenegro','isle of man','jamaica','tanzania','el salvador','vietnam','equatorial guinea','sudan','paraguay','maldives','congo','rwanda','faeroe islands','gabon','martinique','guadeloupe','myanmar','brunei','gibraltar','liberia','madagascar','ethiopia','cambodia','trinidad and tobago','french guiana','bermuda','cabo verde','aruba','togo','monaco','sierra leone','zambia','liechtenstein','bahamas','barbados','uganda','mozambique','sint maarten','guyana','haiti','cayman islands','benin','libya','eswatini','french polynesia','guinea-bissau','nepal','chad','macao','syria','eritrea','saint martin','mongolia','malawi','zimbabwe','angola','antigua and barbuda','timor-leste','botswana','car','laos','belize','fiji','grenada','new caledonia','curaçao','dominica','namibia','saint kitts and nevis','saint lucia','st. vincent grenadines','nicaragua','falkland islands','burundi','montserrat','turks and caicos','greenland','seychelles','gambia','suriname','ms zaandam','vatican city','papua new guinea','mauritania','bhutan','british virgin islands','st. barth','south sudan','western sahara','caribbean netherlands','sao tome and principe','anguilla','saint pierre miquelon','yemen','china']
+
+
+# This is for corona tracking project
+ctp_state_to_abbreviation_mapping = {
+	'alaska': 'AK',
+	'alabama': 'AL', 
+	'arkansas': 'AR', 
+	'american samoa': 'AS',
+	'arizona': 'AZ',
+	'california': 'CA',
+	'colorado': 'CO',
+	'connecticut': 'CT',
+	'district of columbia': 'DC',
+	'delaware': 'DE',
+	'florida': 'FL',
+	'georgia': 'GA',
+	'guam': 'GU',
+	'hawaii': 'HI',
+	'iowa': 'IA',
+	'idaho': 'ID',
+	'illinois': 'IL',
+	'indiana': 'IN',
+	'kansas': 'KS',
+	'kentucky': 'KY',
+	'louisiana': 'LA',
+	'massachusetts': 'MA',
+	'maryland': 'MD',
+	'maine': 'ME',
+	'michigan': 'MI',
+	'minnesota': 'MN',
+	'missouri': 'MO',
+	'northern mariana islands': 'MP',
+	'mississippi': 'MS',
+	'montana': 'MT',
+	'north carolina': 'NC',
+	'north dakota': 'ND',
+	'nebraska': 'NE',
+	'new hampshire': 'NH',
+	'new jersey': 'NJ',
+	'new mexico': 'NM',
+	'nevada': 'NV',
+	'new york': 'NY',
+	'ohio': 'OH',
+	'oklahoma': 'OK',
+	'oregon': 'OR',
+	'pennsylvania': 'PA',
+	'puerto rico': 'PR',
+	'rhode island': 'RI',
+	'south carolina': 'SC',
+	'south dakota': 'SD',
+	'tennessee': 'TN',
+	'texas': 'TX',
+	'utah': 'UT',
+	'virginia': 'VA',
+	'us virgin islands': 'VI',
+	'vermont': 'VT',
+	'washington': 'WA',
+	'wisconsin': 'WI',
+	'west virginia': 'WV',
+	'wyoming': 'WY'}
+
+
+
+

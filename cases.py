@@ -46,7 +46,11 @@ def format_response_for_cases(json_object):
         deaths = json_object["totalDeaths"]
         recovered = json_object["totalRecovered"]
 
-    return ("Cases in {0}: \n{1} confirmed\n{2} recovered\n{3} deaths".
+    if not json_object['totalRecovered']:
+        return ("Cases in {0}: \n{1} confirmed\n{2} deaths".
+        format(displayName, confirmed, deaths))
+
+    else: return ("Cases in {0}: \n{1} confirmed\n{2} recovered\n{3} deaths".
         format(displayName, confirmed, recovered, deaths))
 
 def fetch_data():
@@ -71,13 +75,13 @@ def fetch_data():
         logger.error(f"Response code for World Covid19-server is {req_world.status_code}")
 
     # US State data
-    req_usa = requests.get(url="https://covid19-server.chrismichael.now.sh/api/v1/CasesInAllUSStates")
-    logger.info(f"Request Covid19-server US State Json Response Code: {req_usa.status_code}")
+    req_usa = requests.get(url="https://covidtracking.com/api/v1/states/current.json")
+    logger.info(f"Request Covid Tracking Project US State Json Response Code: {req_usa.status_code}")
 
     if req_usa.status_code == 200:
         state_data = req_usa.json()
     else:
-        logger.error(f"Response code for USA State Covid19-server is {req_usa.status_code}")
+        logger.error(f"Response code for USA State Covid Tracking Project is {req_usa.status_code}")
 
     # Local data
     local_data = pd.read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv')
@@ -179,6 +183,8 @@ def handle_cases(search_term):
         search_term = "south korea"
     if any([search_term in ["united states", "unitedstates", "us", "america"]]):
         search_term = "usa"
+    if search_term == "washington dc":
+        search_term = "district of columbia"
 
     ########################################################
 
@@ -204,24 +210,20 @@ def handle_cases(search_term):
         return format_response_for_cases(obj)
     
     # Total for each US state
-    elif search_term in en.us_states_worldometer:   
-        mystate = ''
-        for state in state_data['data'][0]['table']:   
-            if utility.clean_text(state['USAState']) == search_term:
+    elif search_term in en.ctp_state_to_abbreviation_mapping:
+        for state in state_data:   
+            if state['state'] == en.ctp_state_to_abbreviation_mapping[search_term]:
                 my_state = state
                 break
-
         if my_state == '':
-            # Maybe if the country code changes in the API and what I have
+            # should not get here
             logger.warning("Could not find state for some reason...")
             return (apology_message)
-
-        logger.debug(f"Found number of cases for {my_state['USAState']}")
-
-        obj = {"totalConfirmed": my_state['TotalCases'],
-               "totalRecovered": 0,
-               "totalDeaths": my_state['TotalDeaths'],
-               "displayName": my_state['USAState']}
+            
+        obj = {"totalConfirmed": my_state['positive'],
+                   "totalRecovered": my_state['recovered'],
+                   "totalDeaths": my_state['death'],
+                   "displayName": search_term.title()}
 
         return(format_response_for_cases(obj))    
 

@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.config.from_object(__name__)
 
-source_reply = "The answers for your questions come from creditable sources such as the CDC, WHO, and FDA. The stats come from Worldometers and New York Times."
+source_reply = "The answers to your questions come from the CDC, WHO, and FDA. The stats come from Worldometers, New York Times, and Corona Tracking Project"
 
 generic_message = "Welcome to Silicon Harlem's COVID-19 Text Service\n\nText one of the following options:\nQUESTION\nCASES\nSOURCE\nFEEDBACK\n\nMsg&data rates may apply"
 
