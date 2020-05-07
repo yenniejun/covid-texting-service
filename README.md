@@ -1,15 +1,16 @@
-# Texting Service for COVID-19 Stats
+# Texting Service for COVID-19
 
-This is a texting service that allows you stay updated on the COVID-19 statistics for your region.
-
-You can query the latest coronavirus statistics on cases (confirmed, recovered, and deaths) at a global-level, country-level, US state-level, or US county-level (i.e. county, borough, or parish).
+This is a texting service that provide basic statistics and basic question-answering functionality about COVID-19.  
 
 _             |  _
 :-------------------------:|:-------------------------:
 ![](/img/text_screenshot_1.png)  |  ![](/img/text_screenshot_2.png)
 
 # About the Project
-This project is a texting service that 
+This project is a texting service initially built for those without Internet access to get information about the coronavirus (COVID-19) pandemic. The service provides the latest coronavirus statistics (confirmed, recovered, and deaths) at a global-level, country-level, US state-level, or US county-level (i.e. county, borough, or parish). It also answers basic coronavirus-related questions (for example, about protection, symptoms, quarantine, etc)
+
+To test it out, text "HELLO" to the test number at +1781-524-3409.
+
 
 ## Built With
 * [Twilio](https://www.twilio.com/)
@@ -32,8 +33,11 @@ Note: Louisiana currently has a texting service (text LACOVID to 898211), but it
 
 I am getting my stats from a few sources.
 
-World & US-State level:
+World & Country Level:
 * [COVID19 Real-Time Data REST API v1.0](https://github.com/ChrisMichaelPerezSantiago/covid19) built by Chris Michael. You can reach the API endpoint [here](https://covid19-server.chrismichael.now.sh/api/v1). More details [here](https://www.programmableweb.com/api/covid19-real-time-data-rest-api-v10).
+
+US State Level:
+* [Corona Tracking Project](https://covidtracking.com/api)
 
 US Local level:
 * [New York Times](https://github.com/nytimes/covid-19-data)
@@ -48,9 +52,6 @@ I am scraping my answers from the "Frequently Asked Questions" sections from the
 * [CDC]('https://www.cdc.gov/coronavirus/2019-ncov/faq.html')
 * [FDA]('https://www.fda.gov/emergency-preparedness-and-response/coronavirus-disease-2019-covid-19/coronavirus-disease-2019-covid-19-frequently-asked-questions'
 )
-* [Johns Hopskins Medicine]('https://www.hopkinsmedicine.org/health/conditions-and-diseases/coronavirus/coronavirus-frequently-asked-questions'
-)
-* [CNN]('https://www.cnn.com/interactive/2020/health/coronavirus-questions-answers/') 
 
 Then, I am doing some *very* preliminary question-answer matching. Eventually I'd like to build a model, but for now, I'm just using heuristics:
 * string similarity (Levenshtein)
