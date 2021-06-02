@@ -28,5 +28,5 @@ sklearn==0.0
 soupsieve==2.0
 tqdm==4.45.0
 twilio==6.0.0
-urllib3==1.25.9
+urllib3==1.26.5
 Werkzeug==1.0.1
